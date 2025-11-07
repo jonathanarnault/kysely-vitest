@@ -1,0 +1,31 @@
+{
+	"name": "@kysely-vitest/monorepo",
+	"version": "0.1.0",
+	"author": "Jonathan ARNAULT <jonathan@arnault.dev>",
+	"repository": {
+		"type": "https",
+		"url": "https://github.com/jonathanarnault/kysely-vitest"
+	},
+	"description": "A set of tools to test Kysely models with Vitest.",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"lint:apply": "biome check --write",
+		"lint:check": "biome check"
+	},
+	"private": true,
+	"dependencies": {
+		"kysely": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.3",
+		"@types/node": "^24.10.0",
+		"@vitest/coverage-v8": "^4.0.6",
+		"turbo": "^2.6.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.6",
+		"vitest-browser-react": "^2.0.2"
+	},
+	"packageManager": "pnpm@10.20.0"
+}

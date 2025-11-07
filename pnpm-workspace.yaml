@@ -1,0 +1,6 @@
+packages:
+  - "packages/*"
+
+catalog:
+  kysely: ^0.28.8
+  postgres: ^3.4.7

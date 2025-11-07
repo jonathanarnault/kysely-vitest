@@ -1,0 +1,35 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.3/schema.json",
+	"files": {
+		"includes": [
+			"*.{json,md}",
+			".vscode/*.json",
+			"packages/*/*.ts",
+			"packages/*/migrations/*.js",
+			"packages/*/public/**/*.css",
+			"packages/*/{src,test}/**/*.{css,ts,tsx}"
+		]
+	},
+	"linter": {
+		"rules": {
+			"correctness": {
+				"noUnusedImports": "error"
+			},
+			"nursery": {
+				"useSortedClasses": {
+					"level": "error",
+					"fix": "safe",
+					"options": {}
+				}
+			},
+			"suspicious": {
+				"noUnknownAtRules": "off"
+			}
+		}
+	},
+	"html": {
+		"formatter": {
+			"enabled": true
+		}
+	}
+}

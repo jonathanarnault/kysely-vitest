@@ -1,0 +1,14 @@
+# NPM
+/node_modules
+**/node_modules
+
+# Build
+**/dist
+**/.tanstack
+**/.turbo
+**/tsconfig.tsbuildinfo
+**/*.gen.ts
+
+# Misc
+**/.DS_Store
+**/*.pem
