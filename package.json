@@ -16,16 +16,15 @@
 	},
 	"private": true,
 	"dependencies": {
-		"kysely": "catalog:"
+		"kysely": "catalog:",
+		"vitest": "catalog:"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.3.3",
-		"@types/node": "^24.10.0",
-		"@vitest/coverage-v8": "^4.0.6",
-		"turbo": "^2.6.0",
-		"typescript": "^5.9.3",
-		"vitest": "^4.0.6",
-		"vitest-browser-react": "^2.0.2"
+		"@biomejs/biome": "catalog:",
+		"@types/node": "catalog:",
+		"@vitest/coverage-v8": "catalog:",
+		"turbo": "catalog:",
+		"typescript": "catalog:"
 	},
 	"packageManager": "pnpm@10.20.0"
 }

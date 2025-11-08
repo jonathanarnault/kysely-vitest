@@ -7,11 +7,14 @@
 		"build": "tsc -p tsconfig.lib.json",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
-		"test:watch": "vitest --browser.headless"
+		"test:watch": "vitest"
 	},
 	"dependencies": {
 		"@kysely-vitest/core": "workspace:^",
 		"@kysely-vitest/postgres": "workspace:^",
 		"postgres": "catalog:"
+	},
+	"devDependencies": {
+		"kysely-postgres-js": "catalog:"
 	}
 }

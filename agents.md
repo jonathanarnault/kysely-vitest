@@ -25,13 +25,11 @@ Use `context7` MCP server if available to browse package documentation
 
 ## General Practices
 
-- Use `react` for frontend
-- Use `vitest`, `@vitest/browser` and `vitest-browser-react` for unit tests
+- Use `vitest` for unit tests
 
 ## Architecture
 
 - Libraries are located in the `packages` folder
-- Services are located in the `services` folder
 
 ## Testing
 
@@ -52,15 +50,6 @@ pnpm turbo run test --filter=@kysely-vitest/composer
 - **Clean assertions**: Use appropriate tools instead of manual traversal
 - **Test isolation**: Each test should be independent and not share mutable state
 - **Name you test files *.spec.ts(x)**
-
-**Testing React Components**
-- Use `@vitest/browser` and `vitest-browser-react` for testing React components. 
-- `@vitest/browser` and `vitest-browser-react` are added at the root of the repository, DO NOT add them to inner packages
-- DO USE `expect.element` when testing HTML elements
-
-**Testing zod schemas**
-- Test that validation fails with partial schemas
-- Always use `it.each` for failure cases
 
 **Use parameterized tests with `it.each`**
 - Merge similar test cases using `it.each` to reduce duplication

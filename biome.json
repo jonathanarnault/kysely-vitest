@@ -1,13 +1,12 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.4/schema.json",
 	"files": {
 		"includes": [
-			"*.{json,md}",
+			"*.{json,md,yaml}",
 			".vscode/*.json",
-			"packages/*/*.ts",
+			"packages/*/*.{json,ts}",
 			"packages/*/migrations/*.js",
-			"packages/*/public/**/*.css",
-			"packages/*/{src,test}/**/*.{css,ts,tsx}"
+			"packages/*/src/**/*.ts"
 		]
 	},
 	"linter": {

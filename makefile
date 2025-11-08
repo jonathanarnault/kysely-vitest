@@ -9,8 +9,14 @@ install:								## Install dependencies
 build:									## Build the project
 	@pnpm turbo run build
 
-dev:									## Start Dev Mode
-	@pnpm turbo watch dev
+build-watch:							## Build the project in watch mode
+	@pnpm turbo watch build
+
+start:									## Start containers
+	docker compose up --wait
+
+stop:									## Stop containers
+	docker compose down --volumes
 
 test: 									## Run Unit tests
 	@pnpm turbo run test
