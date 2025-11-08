@@ -10,7 +10,6 @@
 		"test:watch": "vitest"
 	},
 	"dependencies": {
-		"@kysely-vitest/core": "workspace:^",
 		"@kysely-vitest/postgres": "workspace:^",
 		"postgres": "catalog:"
 	},
