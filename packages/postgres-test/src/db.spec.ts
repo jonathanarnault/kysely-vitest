@@ -3,7 +3,11 @@ import { pgTest } from "@kysely-vitest/postgres/test.js";
 import { expect } from "vitest";
 
 describe("db", () => {
-	pgTest("test", async ({ db }) => {
-		expect(db).toBe("a");
+	pgTest("it should select a value", async ({ db }) => {
+		const result = await db
+			.selectNoFrom(({ eb }) => eb.val("1").as("value"))
+			.executeTakeFirstOrThrow();
+
+		expect(result).toEqual({ value: "1" });
 	});
 });

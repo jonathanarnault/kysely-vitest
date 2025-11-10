@@ -5,9 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsc -p tsconfig.lib.json",
-		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
-		"test:watch": "vitest"
+		"typecheck": "tsc --noEmit"
 	},
 	"peerDependencies": {
 		"kysely": "catalog:",
