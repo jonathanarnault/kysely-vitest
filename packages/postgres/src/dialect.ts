@@ -9,7 +9,11 @@ export const postgresDialectFactory: DialectFactory<
 	typeof POSTGRES_CONFIG_KEY
 > = (config) => {
 	return new PostgresJSDialect({
-		postgres: postgres(config),
+		postgres: postgres({
+			debug: false,
+			onnotice() {},
+			...config,
+		}),
 	});
 };
 

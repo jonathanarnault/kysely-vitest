@@ -3,46 +3,57 @@ import { default as path } from "node:path";
 import { FileMigrationProvider, Kysely, Migrator } from "kysely";
 import type { ProvidedContext } from "vitest";
 import type { Vite } from "vitest/node";
-import type { DialectFactory } from "./types.js";
+import type { DialectFactory, SeedFunction } from "./types.js";
 
 export function createPlugin<K extends keyof ProvidedContext>({
 	name,
 	configKey,
 	dialectFactory,
 }: PluginConfig<K>) {
-	return function plugin({
+	return function plugin<DB>({
 		config,
 		migrationFolder,
-	}: PluginParams<K>): Vite.Plugin {
+		seed,
+	}: PluginParams<K, DB>): Vite.Plugin {
 		return {
 			name: `kysely-vitest-${name}`,
 			async configureVitest(context) {
-				if (migrationFolder) {
-					const db = new Kysely({
-						dialect: dialectFactory(config[configKey]),
-					});
-					try {
-						const migrator = new Migrator({
-							db,
-							provider: new FileMigrationProvider({
-								fs,
-								path,
-								migrationFolder,
-							}),
-						});
+				const db = new Kysely<DB>({
+					dialect: dialectFactory(config),
+				});
 
-						await migrator.migrateToLatest();
-					} catch (e) {
-						context.vitest.logger.error(
-							`[${name}] Error during migrations: ${e}`,
-						);
-						throw e;
-					} finally {
-						await db.destroy();
+				try {
+					if (migrationFolder) {
+						try {
+							const migrator = new Migrator({
+								db,
+								provider: new FileMigrationProvider({
+									fs,
+									path,
+									migrationFolder,
+								}),
+							});
+
+							await migrator.migrateToLatest();
+						} catch (e) {
+							context.vitest.logger.error(
+								`[${name}] Error during migrations: ${e}`,
+							);
+							throw e;
+						}
 					}
-				}
 
-				context.vitest.provide(configKey, config);
+					try {
+						await seed?.(db);
+					} catch (e) {
+						context.vitest.logger.error(`[${name}] Error during seeding: ${e}`);
+						throw e;
+					}
+
+					context.vitest.provide(configKey, config);
+				} finally {
+					await db.destroy();
+				}
 			},
 		};
 	};
@@ -54,7 +65,8 @@ export type PluginConfig<K extends keyof ProvidedContext> = {
 	dialectFactory: DialectFactory<K>;
 };
 
-export type PluginParams<K extends keyof ProvidedContext> = {
+export type PluginParams<K extends keyof ProvidedContext, DB> = {
 	config: ProvidedContext[K];
 	migrationFolder?: string;
+	seed?: SeedFunction<DB>;
 };
