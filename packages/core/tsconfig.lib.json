@@ -1,8 +1,9 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"include": ["src"],
-	"exclude": ["src/**/*.spec.ts", "src/pgTest.ts"],
+	"exclude": ["src/**/*.spec.ts"],
 	"compilerOptions": {
+		"types": ["vitest/config"],
 		"outDir": "dist",
 		"rootDir": "src",
 		"lib": ["es2024"],

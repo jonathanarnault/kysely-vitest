@@ -1,20 +1,8 @@
-import type { Options, PostgresType } from "postgres";
-import type { PostgresConfig } from "vitest";
-import type { Vite } from "vitest/node";
+import { createPlugin } from "@kysely-vitest/core/plugin.js";
+import { POSTGRES_CONFIG_KEY, postgresDialectFactory } from "./dialect.js";
 
-export function kyselyPostgres(config: PostgresConfig): Vite.Plugin {
-	return {
-		name: "kysely-vitest-postgres",
-		async configureVitest(context) {
-			context.vitest.provide("postgresConfig", config);
-		},
-	};
-}
-
-declare module "vitest" {
-	export type PostgresConfig = Options<Record<string, PostgresType>>;
-
-	export interface ProvidedContext {
-		postgresConfig: PostgresConfig;
-	}
-}
+export const kyselyPostgres = createPlugin({
+	name: "postgres",
+	configKey: POSTGRES_CONFIG_KEY,
+	dialectFactory: postgresDialectFactory,
+});

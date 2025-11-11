@@ -1,0 +1,12 @@
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+	plugins: [],
+	test: {
+		include: ["src/**/*.spec.ts"],
+		testTimeout: 2500,
+		coverage: {
+			provider: "v8",
+		},
+	},
+});

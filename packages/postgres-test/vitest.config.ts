@@ -1,12 +1,16 @@
+import path from "node:path";
 import { kyselyPostgres } from "@kysely-vitest/postgres/plugin.js";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
 	plugins: [
 		kyselyPostgres({
-			database: "testdb",
-			username: "test",
-			password: "test",
+			config: {
+				database: "testdb",
+				username: "test",
+				password: "test",
+			},
+			migrationFolder: path.resolve(__dirname, "migrations"),
 		}),
 	],
 	test: {

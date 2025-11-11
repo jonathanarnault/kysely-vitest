@@ -1,5 +1,5 @@
 {
-	"name": "@kysely-vitest/postgres",
+	"name": "@kysely-vitest/core",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
@@ -7,16 +7,11 @@
 		"build": "tsc -p tsconfig.lib.json",
 		"typecheck": "tsc --noEmit -p tsconfig.lib.json -p tsconfig.test.json"
 	},
-	"dependencies": {
-		"@kysely-vitest/core": "workspace:^"
-	},
 	"peerDependencies": {
 		"kysely": "catalog:",
-		"kysely-postgres-js": "catalog:",
 		"vitest": "catalog:"
 	},
 	"devDependencies": {
-		"kysely-postgres-js": "catalog:",
 		"postgres": "catalog:"
 	},
 	"exports": {

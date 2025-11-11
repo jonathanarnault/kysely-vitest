@@ -1,13 +1,15 @@
-import { describe } from "node:test";
-import { pgTest } from "@kysely-vitest/postgres/test.js";
-import { expect } from "vitest";
+import { describe, expect } from "vitest";
+import { pgTest } from "./pgTest.js";
 
 describe("db", () => {
 	pgTest("it should select a value", async ({ db }) => {
-		const result = await db
-			.selectNoFrom(({ eb }) => eb.val("1").as("value"))
-			.executeTakeFirstOrThrow();
+		await db.insertInto("users").values({ username: "alice" }).execute();
 
-		expect(result).toEqual({ value: "1" });
+		expect(db.selectFrom("users").selectAll().execute()).resolves.toEqual([
+			{
+				id: expect.any(Number),
+				username: "alice",
+			},
+		]);
 	});
 });
