@@ -23,7 +23,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: make install
+        run: pnpm install --frozen-lockfile
 
       - name: Run Biome lint
         run: make lint-check
@@ -44,7 +44,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run TypeScript type check
         run: make typecheck
@@ -69,7 +69,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: make install
+        run: pnpm install --frozen-lockfile
 
       - name: Start Docker Containers
         run: make start
