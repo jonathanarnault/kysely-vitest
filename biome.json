@@ -4,6 +4,7 @@
 		"includes": [
 			"*.{json,md,yaml}",
 			".vscode/*.json",
+			".github/**/*.{yml,md}",
 			"packages/*/*.{json,ts}",
 			"packages/*/migrations/*.js",
 			"packages/*/src/**/*.ts"
