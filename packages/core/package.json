@@ -2,6 +2,10 @@
 	"name": "@kysely-vitest/core",
 	"version": "0.1.0",
 	"type": "module",
+	"repository": {
+		"type": "https",
+		"url": "https://github.com/jonathanarnault/kysely-vitest"
+	},
 	"scripts": {
 		"build": "tsc -p tsconfig.lib.json",
 		"typecheck": "tsc --noEmit -p tsconfig.lib.json -p tsconfig.test.json"
