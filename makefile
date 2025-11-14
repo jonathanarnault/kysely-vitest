@@ -33,8 +33,11 @@ lint-check:								## Run lint checks
 lint-apply:								## Apply lint fixes
 	@pnpm turbo run lint:apply
 
+pack:									## Pack all packages into the dist/ folder
+	pnpm pack -r --pack-destination=dist
+
 version-bump:							## Bump version for all packages
 	pnpm version $(VERSION) --workspaces --no-git-tag-version --no-commit-hooks --no-workspaces-update
 
-publish:
+publish:								## Publish all public packages
 	pnpm publish -r --access public
