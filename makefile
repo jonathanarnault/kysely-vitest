@@ -32,3 +32,9 @@ lint-check:								## Run lint checks
 
 lint-apply:								## Apply lint fixes
 	@pnpm turbo run lint:apply
+
+version-bump:							## Bump version for all packages
+	pnpm version $(VERSION) --workspaces --no-git-tag-version --no-commit-hooks --no-workspaces-update
+
+publish:
+	pnpm publish -r --access public
