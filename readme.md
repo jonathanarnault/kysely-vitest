@@ -1,1 +1,311 @@
-# kysely-vitest
+# `kysely-vitest`
+
+`kysely-vitest` provides helpers to test your modules that depends on [`kysely`](https://kysely.dev/) to query your database.
+
+## Installation
+
+`kysely-vitest` depends on both `kysely@^0.28.0` and `vitest@^4.0.0` as peer dependencies for all adapters. Run one of the following commands to install the dependencies:
+
+```shell
+npm install kysely && npm install -D vitest
+# or
+yarn add kysely && yarn add -D vitest
+# or
+pnpm add kysely && pnpm add -D vitest
+```
+
+Then, you can define your [database types](https://kysely.dev/docs/getting-started#types) in `src/db.ts`:
+
+```ts
+// in src/db.ts
+export type DB = {
+    // ...
+};
+```
+
+## Adapaters
+
+Once these dependencies have been installed and your database types defined, you can install one of the adapters provided by `kysely-vitest`:
+
+- [Postgres Adapter](#postgres-adapter)
+- [Create a Custom Adapter](#create-a-custom-adapter)
+
+### Postgres Adapter
+
+First, install the `@kysely-vitest/postgres` adapter
+
+```shell
+npm install kysely-postgres-js && npm install -D @kysely-vitest/postgres
+# or
+yarn add kysely-postgres-js && yarn add -D @kysely-vitest/postgres
+# or
+pnpm add kysely-postgres-js && pnpm add -D @kysely-vitest/postgres
+```
+
+Note: The `@kysely-vitest/postgres` adapter uses the [`postgres.js`](https://www.npmjs.com/package/postgres). If you want to use the [`pg`](https://www.npmjs.com/package/pg) adapter, you can [create your own dapater](#create-a-custom-adapter)
+
+#### Configure the Plugin
+
+First, we will register the `kyselyPostgres` plugin in `vitest.config.ts`:
+
+```ts
+// in vitest.config.ts
+import path from "node:path";
+import { kyselyPostgres } from "@kysely-vitest/postgres/plugin.js";
+import { defineConfig } from "vitest/config";
+import type { DB } from "./src/db.js";
+
+export default defineConfig({
+    plugins: [
+        // Other plugins
+        kyselyPostgres<DB>({
+            config: {
+                database: "testdb",
+                username: "test",
+                password: "test",
+            },
+            migrationFolder: path.resolve(__dirname, "migrations"),
+        }),
+    ],
+    test: {
+        // Test configuration
+    },
+});
+```
+
+Then we can create the `pgTest` function in `src/tests/pgTest.ts` that will be used in our test suite:
+
+```ts
+// in src/tests/pgTest.ts
+import { createPostgresTestFunction } from "@kysely-vitest/postgres/test.js";
+import type { DB } from "../db.js";
+
+export const pgTest = createPostgresTestFunction<DB>();
+```
+
+Note: The test function will create a database client by worker.
+
+#### Create a Test
+
+To run a test on your database, use the `pgTest` function instead of the `it/test` function provided by `vitest`. Note that `pgTest` is an extension of `it/test` and can be used exactly as the base function.
+
+```ts
+// in src/myTestSuite.spec.ts
+import { describe, expect } from "vitest";
+import { pgTest } from "./tests/pgTest.js";
+
+describe("myTestSuite", () => {
+    pgTest("my test", async ({ db }) => {
+        // ...
+    });
+});
+```
+
+Note: The `db` parameter is a transaction that is rolled back after the test to ensure that each test runs in isolation.
+
+#### Run your Test Suite
+
+To run you test suite, you will need to start a PostgreSQL database. The `@kysely-vitest/postgres` plugin will automatically run your migrations on that database.
+
+You use the following `docker-compose.yml` file to run your test database:
+
+```yml
+# in docker-compose.yml
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: testdb
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+```
+
+Then run your test suite with the following commands:
+
+```shell
+# Start test database
+docker compose up --wait
+
+# Run you tests
+npx vitest
+# or
+yarn vitest
+# or
+pnpm vitest
+
+# Stop test database an cleanup volumes
+docker compose down --volumes
+```
+
+### Create a Custom Adapter
+
+`@kysely-vitest/core` provides helper functions to create you custom adapter for `kysely-vitest`. An adapter consists in 3 functions:
+
+- A `kysely` [dialect factory](#create-the-dialect-factory)
+- A `vitest` [plugin function](#create-the-plugin-function)
+- A `test` [function factory](#create-the-test-function-factory)
+
+#### Create the Dialect Factory
+
+The dialect factory will be used to initialize the connection to the database when running migrations, seeding the database and running tests.
+
+Here is an example on how to create you dialect factory function:
+
+```ts
+// in src/tests/dialect.ts
+import type { DialectFactory } from "@kysely-vitest/core/types.js";
+import { MyDialect } from 'kysely/my-dialect';
+
+export const MY_DIALECT_CONFIG_KEY = "myDialectConfig" as const;
+
+export const myDialectFactory: DialectFactory<
+    typeof MY_DIALECT_CONFIG_KEY
+> = (config) => {
+    return new MyDialect({
+        // Dialect configuration
+    })
+};
+
+// Extend vitest types
+declare module "vitest" {
+    export type MyDialectConfig = {
+        // Dialect options
+    };
+
+    export interface ProvidedContext {
+        myDialectConfig: MyDialectConfig;
+    }
+}
+```
+
+#### Create the Plugin Function
+
+Once your dialect function has been created, you can create the plugin function that will be used by `vitest` to run migrations, seed the database and configure your `test` function.
+
+Here is an example on how to create your plugin:
+
+```ts
+// in src/tests/plugin.ts
+import { createPlugin } from "@kysely-vitest/core/plugin.js";
+import { MY_DIALECT_CONFIG_KEY, myDialectFactory } from "./dialect.js";
+
+export const kyselyPlugin = createPlugin({
+    name: "plugin",
+    configKey: MY_DIALECT_CONFIG_KEY,
+    dialectFactory: myDialectFactory,
+});
+```
+
+Then, you can use your plugin in the `vitest.config.ts` file:
+
+```ts
+// in vitest.config.ts
+import path from "node:path";
+import { defineConfig } from "vitest/config";
+import type { DB } from "./src/db.js";
+import { kyselyPlugin } from "./src/tests/plugin.js";
+
+export default defineConfig({
+    plugins: [
+        // Other plugins
+        kyselyPlugin<DB>({
+            config: {
+                // Your dialect configuration
+            },
+            migrationFolder: path.resolve(__dirname, "migrations"),
+        }),
+    ],
+    test: {
+        // Test configuration
+    },
+});
+```
+
+Note: You can use also use a [`seed`](#seeding) function with your plugin.
+
+#### Create the Test Function Factory
+
+Once your plugin has been configured, you can create your `test` function. Here is an example of a `dbTest` function:
+
+```ts
+// in src/tests/dbTest.ts
+import { createTestFunction } from "@kysely-vitest/core/test.js";
+import { MY_DIALECT_CONFIG_KEY, myDialectFactory } from "./dialect.js";
+import type { DB } from "../db.js";
+
+export const dbTest = createTestFunction<typeof MY_DIALECT_CONFIG_KEY, DB>({
+    configKey: MY_DIALECT_CONFIG_KEY,
+    dialectFactory: myDialectFactory,
+});
+```
+
+Then you can use your test function inside your test suites:
+
+```ts
+// in src/myTestSuite.spec.ts
+import { describe, expect } from "vitest";
+import { dbTest } from "./tests/dbTest.js";
+
+describe("myTestSuite", () => {
+    dbTest("my test", async ({ db }) => {
+        // ...
+    });
+});
+```
+
+Note: The `db` parameter is a transaction that is rolled back after the test to ensure that each test runs in isolation.
+
+## Seeding
+
+You can provide a seeding function to your adapter to seed your database before running the tests. Here is an example with the `@kysely-vitest/postgres` adapter:
+
+First create your `seed` function in `src/tests/seed.js`:
+
+```ts
+// in src/tests/seed.js
+import type { SeedFunction } from "@kysely-vitest/postgres/types.js";
+import { sql } from "kysely";
+import type { DB } from "../db.js";
+
+export const seed: SeedFunction<DB> = async (db) => {
+    await sql<void>`TRUNCATE TABLE "users" RESTART IDENTITY CASCADE`.execute(db);
+
+    await db
+        .insertInto("users")
+        .values([{ username: "alice" }, { username: "bob" }])
+        .execute();
+};
+```
+
+Then configure the plugin in `vitest.config.ts` to use your `seed` function:
+
+```ts
+// in vitest.config.ts
+import path from "node:path";
+import { kyselyPostgres } from "@kysely-vitest/postgres/plugin.js";
+import { defineConfig } from "vitest/config";
+import type { DB } from "./src/db.js";
+import { seed } from "./src/tests/seed.js";
+
+export default defineConfig({
+    plugins: [
+        // Other plugins
+        kyselyPostgres<DB>({
+            // Configure the plugin
+            seed,
+        }),
+    ],
+    test: {
+        // Test configuration
+    },
+});
+```
+
+Note: The seeding function will be run once before running your tests suite and will not run on test reload.
