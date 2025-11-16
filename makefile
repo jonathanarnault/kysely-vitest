@@ -7,7 +7,7 @@ install:								## Install dependencies
 	@pnpm install
 
 build:									## Build the project
-	@pnpm turbo run build
+	@pnpm turbo run build --no-cache
 
 build-watch:							## Build the project in watch mode
 	@pnpm turbo watch build

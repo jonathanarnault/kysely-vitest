@@ -1,26 +1,22 @@
 {
-	"name": "@kysely-vitest/core",
+	"name": "@kysely-vitest/postgres-test-docker",
 	"version": "0.1.1",
+	"private": true,
 	"type": "module",
 	"repository": {
 		"type": "https",
 		"url": "https://github.com/jonathanarnault/kysely-vitest"
 	},
 	"scripts": {
-		"build": "tsc --build --force tsconfig.lib.json",
 		"typecheck": "tsc --noEmit -p tsconfig.lib.json -p tsconfig.test.json",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
-	"peerDependencies": {
-		"kysely": "catalog:",
-		"vitest": "catalog:"
-	},
-	"devDependencies": {
+	"dependencies": {
+		"@kysely-vitest/postgres": "workspace:^",
 		"postgres": "catalog:"
 	},
-	"exports": {
-		".": "./dist/index.js",
-		"./*": "./dist/*"
+	"devDependencies": {
+		"kysely-postgres-js": "catalog:"
 	}
 }
