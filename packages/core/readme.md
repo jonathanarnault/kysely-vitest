@@ -84,6 +84,47 @@ export default defineConfig({
 
 Note: You can use also use a [`seed`](#seeding) function with your plugin.
 
+## Configuration Provider
+
+The `configProvider` function can be used to cleanup the configuration that will be passed to the test context and configure the managed docker container.
+
+Pass your custom config provider when you configure your plugin:
+
+```ts
+// ...
+import { configProvider, type MyConfig } from "./config.js";
+
+export const kyselyPlugin = createPlugin<
+    typeof MY_DIALECT_CONFIG_KEY,
+    MyConfig
+>({
+    name: "plugin",
+    configKey: MY_DIALECT_CONFIG_KEY,
+    configProvider,
+    dialectFactory: myDialectFactory,
+});
+```
+
+Then you can create your custom config provider in `src/tests/config.js`:
+
+```ts
+// in src/tests/config.js
+
+export const configProvider: ConfigProvider<
+    typeof MY_DIALECT_CONFIG_KEY,
+    MyConfig
+> = async (config) {
+    return {
+        config: {
+            // ... transform provided config
+        },
+        dockerContainer: {
+            // ... Docker container configuration
+        } | false
+    }
+}
+```
+
 ## Create the Test Function Factory
 
 Once your plugin has been configured, you can create your `test` function. Here is an example of a `dbTest` function:
