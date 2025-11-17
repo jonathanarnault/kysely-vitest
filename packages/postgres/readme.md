@@ -82,11 +82,68 @@ describe("myTestSuite", () => {
 
 Note: The `db` parameter is a transaction that is rolled back after the test to ensure that each test runs in isolation.
 
-## Run your Test Suite
+## Run your Test Suite with a Managed Container
 
-To run you test suite, you will need to start a PostgreSQL database. The `@kysely-vitest/postgres` plugin will automatically run your migrations on that database.
+To run you test suite with a managed container, you can configure the container to use in the `vitest.config.ts` file.
 
-You use the following `docker-compose.yml` file to run your test database:
+Here is an example on how to configure a managed container with `@kysely-vitest/postgres`:
+
+```ts
+// in vitest.config.ts
+
+export default defineConfig({
+    plugins: [
+        // Other plugins
+        kyselyPostgres<DB>({
+            config: {
+                // Will be used as host port, defaults to `5432`
+                port: 5433,
+
+                // Will be used in POSTGRES_DB env, defaults to `testdb`
+                database: "mydb",
+
+                // Will be used in POSTGRES_USER env, defaults to `testuser`
+                user: "myuser",
+
+                // Will be used in POSTGRES_PASSWORD env, defaults to `test`
+                password: "secret",
+
+                // The container will use postgres:latest
+                dockerContainer: true
+            },
+        }),
+    ],
+});
+```
+
+You can also select a custom `image` or `tag` for the container:
+
+```ts
+// in vitest.config.ts
+
+export default defineConfig({
+    plugins: [
+        // Other plugins
+        kyselyPostgres<DB>({
+            config: {
+                // ... configuration
+
+                // Use custom image / tag
+                dockerContainer: {
+                    image: "postgres",
+                    tag: "18-alpine",
+                },
+            },
+        }),
+    ],
+});
+```
+
+## Run your Test Suite with an Unmanaged Container
+
+To run you test suite with an unmanaged container, you will need to start a PostgreSQL database on your own. The `@kysely-vitest/postgres` plugin will automatically run your migrations on that database.
+
+You can use the following `docker-compose.yml` file to run your test database:
 
 ```yml
 # in docker-compose.yml
