@@ -55,7 +55,7 @@ export async function stopDockerContainer(containerName: string | null) {
 	if (!containerName) {
 		return;
 	}
-	await execAsync(`docker rm -f ${containerName}`);
+	await execAsync(`docker rm --volumes -f ${containerName}`);
 }
 
 export function buildContainerArgs(
