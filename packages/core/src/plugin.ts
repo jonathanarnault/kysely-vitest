@@ -64,7 +64,7 @@ export function createPlugin<K extends keyof ProvidedContext, C>({
 
 					await seed?.(db);
 
-					context.vitest.provide(configKey, checkedConfig);
+					context.project.provide(configKey, checkedConfig);
 				} catch (e) {
 					context.vitest.logger.error(`[${name}] Error during setup: ${e}`);
 					await stopDockerContainer(containerName);
