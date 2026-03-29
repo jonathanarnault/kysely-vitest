@@ -16,15 +16,6 @@ export const configProvider: ConfigProvider<
 	PluginConfig
 > = async ({ dockerContainer, ...config }) => {
 	if (dockerContainer) {
-		const image =
-			dockerContainer === true
-				? DEFAULT_DOCKER_IMAGE
-				: (dockerContainer.image ?? DEFAULT_DOCKER_IMAGE);
-		const tag =
-			dockerContainer === true
-				? DEFAULT_DOCKER_TAG
-				: (dockerContainer.tag ?? DEFAULT_DOCKER_TAG);
-
 		const port = config.port ?? DEFAULT_POSTGRES_PORT;
 
 		const database = config.database ?? DEFAULT_POSTGRES_DB;
@@ -34,13 +25,62 @@ export const configProvider: ConfigProvider<
 				? await config.password()
 				: config.password) || DEFAULT_POSTGRES_PASSWORD;
 
+		const baseContainer = {
+			healthcheck: {
+				test: ["pg_isready", "-U", user],
+				interval: "5s",
+				timeout: "5s",
+				retries: 5,
+			},
+			ports: [
+				{
+					hostPort: port,
+					containerPort: DEFAULT_POSTGRES_PORT,
+				},
+			],
+			environment: {
+				POSTGRES_DB: database,
+				POSTGRES_USER: user,
+				POSTGRES_PASSWORD: password || DEFAULT_POSTGRES_PASSWORD,
+			},
+		};
+
+		if (
+			dockerContainer !== true &&
+			typeof dockerContainer.dockerFile === "string"
+		) {
+			const { dockerFile, image } = dockerContainer;
+			return {
+				config: {
+					...config,
+					host: "localhost",
+					port,
+					database,
+					user,
+					password,
+				},
+				dockerContainer: {
+					dockerFile,
+					...(image !== undefined && { image }),
+					...baseContainer,
+				},
+			};
+		}
+
+		const image =
+			dockerContainer === true
+				? DEFAULT_DOCKER_IMAGE
+				: (dockerContainer.image ?? DEFAULT_DOCKER_IMAGE);
+		const tag =
+			dockerContainer === true
+				? DEFAULT_DOCKER_TAG
+				: (dockerContainer.tag ?? DEFAULT_DOCKER_TAG);
+
 		return {
 			config: {
 				...config,
-
 				host: "localhost",
 				port,
-
 				database,
 				user,
 				password,
@@ -48,23 +88,7 @@ export const configProvider: ConfigProvider<
 			dockerContainer: {
 				image,
 				tag,
-				healthcheck: {
-					test: ["pg_isready", "-U", user],
-					interval: "5s",
-					timeout: "5s",
-					retries: 5,
-				},
-				ports: [
-					{
-						hostPort: port,
-						containerPort: DEFAULT_POSTGRES_PORT,
-					},
-				],
-				environment: {
-					POSTGRES_DB: database,
-					POSTGRES_USER: user,
-					POSTGRES_PASSWORD: password || DEFAULT_POSTGRES_PASSWORD,
-				},
+				...baseContainer,
 			},
 		};
 	}
@@ -76,15 +100,7 @@ export const configProvider: ConfigProvider<
 
 export type PluginConfig = ProvidedContext[typeof POSTGRES_CONFIG_KEY] & {
 	dockerContainer?:
-		| {
-				image?: typeof DEFAULT_DOCKER_IMAGE | string;
-				tag?:
-					| "18"
-					| "18-alpine"
-					| "17"
-					| "17-alpine"
-					| typeof DEFAULT_DOCKER_TAG
-					| string;
-		  }
+		| { image?: string; tag?: string; dockerFile?: never }
+		| { dockerFile: string; image?: string; tag?: never }
 		| true;
 };

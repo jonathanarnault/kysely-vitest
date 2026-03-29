@@ -8,7 +8,19 @@ export async function startDockerContainer(
 	container: DockerContainer,
 ): Promise<string> {
 	const containerName = randomUUID().toString();
-	const args = buildContainerArgs(container, containerName);
+
+	let imageRef: string;
+	if (container.dockerFile != null) {
+		const { dockerFile, image: imageName = `kysely-vitest-${containerName}` } =
+			container;
+		const context = dockerFile.substring(0, dockerFile.lastIndexOf("/")) || ".";
+		await execAsync(`docker build -f ${dockerFile} -t ${imageName} ${context}`);
+		imageRef = imageName;
+	} else {
+		imageRef = `${container.image}:${container.tag}`;
+	}
+
+	const args = buildContainerArgs(container, containerName, imageRef);
 
 	await execAsync(`docker run ${args}`);
 	await waitForContainer(
@@ -36,10 +48,7 @@ async function waitForContainer(
 	return waitForContainer(containerName, status);
 }
 
-export type DockerContainer = {
-	image: string;
-	tag: string;
-
+type DockerContainerBase = {
 	environment?: Record<string, string>;
 	ports?: Array<{ hostPort: number; containerPort: number }>;
 	healthcheck?: {
@@ -51,6 +60,12 @@ export type DockerContainer = {
 	};
 };
 
+export type DockerContainer = DockerContainerBase &
+	(
+		| { image: string; tag: string; dockerFile?: never }
+		| { dockerFile: string; image?: string; tag?: never }
+	);
+
 export async function stopDockerContainer(containerName: string | null) {
 	if (!containerName) {
 		return;
@@ -59,8 +74,9 @@ export async function stopDockerContainer(containerName: string | null) {
 }
 
 export function buildContainerArgs(
-	{ image: name, tag, environment, ports, healthcheck }: DockerContainer,
+	{ environment, ports, healthcheck }: DockerContainer,
 	containerName: string,
+	imageRef: string,
 ): string {
 	const portsParts = ports
 		? ports.map(
@@ -92,6 +108,6 @@ export function buildContainerArgs(
 		...portsParts,
 		...envParts,
 		...healthcheckParts,
-		`${name}:${tag}`,
+		imageRef,
 	].join(" ");
 }

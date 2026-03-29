@@ -1,4 +1,5 @@
 import { exec } from "node:child_process";
+import path from "node:path";
 import { promisify } from "node:util";
 
 import { describe, expect, it } from "vitest";
@@ -19,9 +20,27 @@ describe("buildContainerArgs", () => {
 			tag: "18",
 		};
 
-		const result = buildContainerArgs(container, "test-container");
+		const result = buildContainerArgs(
+			container,
+			"test-container",
+			"postgres:18",
+		);
 
 		expect(result).toBe("-d --name test-container postgres:18");
+	});
+
+	it("builds basic container args with dockerFile", () => {
+		const container: DockerContainer = {
+			dockerFile: "/path/to/Dockerfile",
+		};
+
+		const result = buildContainerArgs(
+			container,
+			"test-container",
+			"kysely-vitest-abc123",
+		);
+
+		expect(result).toBe("-d --name test-container kysely-vitest-abc123");
 	});
 
 	it.each([
@@ -53,7 +72,11 @@ describe("buildContainerArgs", () => {
 			environment,
 		};
 
-		const result = buildContainerArgs(container, "test-container");
+		const result = buildContainerArgs(
+			container,
+			"test-container",
+			"postgres:18",
+		);
 
 		expect(result).toBe(expected);
 	});
@@ -84,7 +107,11 @@ describe("buildContainerArgs", () => {
 			ports,
 		};
 
-		const result = buildContainerArgs(container, "test-container");
+		const result = buildContainerArgs(
+			container,
+			"test-container",
+			"postgres:18",
+		);
 
 		expect(result).toBe(expected);
 	});
@@ -163,7 +190,11 @@ describe("buildContainerArgs", () => {
 			healthcheck,
 		};
 
-		const result = buildContainerArgs(container, "test-container");
+		const result = buildContainerArgs(
+			container,
+			"test-container",
+			"postgres:18",
+		);
 
 		expect(result).toBe(expected);
 	});
@@ -182,7 +213,11 @@ describe("buildContainerArgs", () => {
 			},
 		};
 
-		const result = buildContainerArgs(container, "test-container");
+		const result = buildContainerArgs(
+			container,
+			"test-container",
+			"postgres:18",
+		);
 
 		expect(result).toBe(
 			'-d --name test-container -p 5432:5432 -e POSTGRES_USER=admin --health-cmd="CMD-SHELL pg_isready" --health-interval=5s postgres:18',
@@ -252,4 +287,37 @@ describe("runContainer", () => {
 			expect(stdout.toString().trim()).toBe("");
 		}
 	}, 15_000);
+
+	it("should build and run a container from a dockerFile", async () => {
+		let containerName: string | null = null;
+		try {
+			const container: DockerContainer = {
+				dockerFile: path.resolve(import.meta.dirname, "fixtures/Dockerfile"),
+				healthcheck: {
+					test: ["pg_isready", "-U", "test"],
+					interval: "2s",
+					timeout: "1s",
+					retries: 10,
+				},
+				environment: {
+					POSTGRES_DB: "testdb",
+					POSTGRES_USER: "test",
+					POSTGRES_PASSWORD: "secret",
+				},
+			};
+
+			containerName = await startDockerContainer(container);
+
+			const { stdout } = await execAsync(
+				`docker ps --filter "name=${containerName}" --filter "health=healthy" --format "{{.Names}}"`,
+			);
+			expect(stdout.toString().trim()).toBe(containerName);
+		} finally {
+			await stopDockerContainer(containerName);
+			const { stdout } = await execAsync(
+				`docker ps --filter "name=${containerName}" --format "{{.Names}}"`,
+			);
+			expect(stdout.toString().trim()).toBe("");
+		}
+	}, 60_000);
 });

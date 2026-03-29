@@ -1,5 +1,5 @@
 {
-	"name": "@kysely-vitest/postgres-test-external",
+	"name": "@kysely-vitest/postgres-test-dockerfile",
 	"version": "0.3.0",
 	"private": true,
 	"type": "module",
