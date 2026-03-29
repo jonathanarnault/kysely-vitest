@@ -106,26 +106,23 @@ describe("configProvider", () => {
 				expectedUser: DEFAULT_POSTGRES_USER,
 				expectedPort: 5555,
 			},
-		])(
-			"overrides defaults with $configOverride",
-			async ({
-				configOverride,
-				expectedDatabase,
-				expectedUser,
-				expectedPort,
-			}) => {
-				const config: PluginConfig = {
-					dockerContainer: true,
-					...configOverride,
-				};
+		])("overrides defaults with $configOverride", async ({
+			configOverride,
+			expectedDatabase,
+			expectedUser,
+			expectedPort,
+		}) => {
+			const config: PluginConfig = {
+				dockerContainer: true,
+				...configOverride,
+			};
 
-				const result = await configProvider(config);
+			const result = await configProvider(config);
 
-				expect(result.config.database).toBe(expectedDatabase);
-				expect(result.config.user).toBe(expectedUser);
-				expect(result.config.port).toBe(expectedPort);
-			},
-		);
+			expect(result.config.database).toBe(expectedDatabase);
+			expect(result.config.user).toBe(expectedUser);
+			expect(result.config.port).toBe(expectedPort);
+		});
 
 		it("handles password as a string", async () => {
 			const config: PluginConfig = {
@@ -218,21 +215,22 @@ describe("configProvider", () => {
 				expectedImage: "custom-postgres",
 				expectedTag: "18",
 			},
-		])(
-			"uses image=$expectedImage and tag=$expectedTag when dockerContainer is $dockerConfig",
-			async ({ dockerConfig, expectedImage, expectedTag }) => {
-				const config: PluginConfig = {
-					dockerContainer: dockerConfig,
-				};
+		])("uses image=$expectedImage and tag=$expectedTag when dockerContainer is $dockerConfig", async ({
+			dockerConfig,
+			expectedImage,
+			expectedTag,
+		}) => {
+			const config: PluginConfig = {
+				dockerContainer: dockerConfig,
+			};
 
-				const result = await configProvider(config);
+			const result = await configProvider(config);
 
-				if (result.dockerContainer !== false) {
-					expect(result.dockerContainer.image).toBe(expectedImage);
-					expect(result.dockerContainer.tag).toBe(expectedTag);
-				}
-			},
-		);
+			if (result.dockerContainer !== false) {
+				expect(result.dockerContainer.image).toBe(expectedImage);
+				expect(result.dockerContainer.tag).toBe(expectedTag);
+			}
+		});
 
 		it("combines docker image config with database config", async () => {
 			const config: PluginConfig = {

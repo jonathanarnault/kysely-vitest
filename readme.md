@@ -160,6 +160,38 @@ export default defineConfig({
 });
 ```
 
+You can also use a custom Dockerfile to build and run the container:
+
+```ts
+// in vitest.config.ts
+import path from "node:path";
+
+export default defineConfig({
+    plugins: [
+        // Other plugins
+        kyselyPostgres<DB>({
+            config: {
+                // ... configuration
+
+                // Build and run a container from a custom Dockerfile
+                dockerContainer: {
+                    dockerFile: path.resolve(__dirname, "Dockerfile"),
+                },
+            },
+        }),
+    ],
+});
+```
+
+You can also specify a custom image name for the built image using the `image` option:
+
+```ts
+dockerContainer: {
+    dockerFile: path.resolve(__dirname, "Dockerfile"),
+    image: "my-custom-postgres",
+},
+```
+
 #### Run your Test Suite with an Unmanaged Container
 
 To run you test suite with an unmanaged container, you will need to start a PostgreSQL database on your own. The `@kysely-vitest/postgres` plugin will automatically run your migrations on that database.
