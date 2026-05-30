@@ -1,13 +1,22 @@
 packages:
   - packages/*
 
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAge: 4320
+
 catalog:
-  '@biomejs/biome': 2.4.9
-  '@types/node': ^24.10.0
-  '@vitest/coverage-v8': ^4.1.2
-  kysely: ^0.28.14
+  '@biomejs/biome': 2.4.15
+  '@types/node': ^24.12.4
+  '@vitest/coverage-v8': ^4.1.7
+  kysely: ^0.29.2
   kysely-postgres-js: ^3.0.0
   postgres: ^3.4.7
-  turbo: ^2.8.21
-  typescript: ^6.0.2
-  vitest: ^4.1.2
+  turbo: ^2.9.14
+  typescript: ^6.0.3
+  vitest: ^4.1.7
+
+catalogMode: strict
+
+trustPolicy: no-downgrade
