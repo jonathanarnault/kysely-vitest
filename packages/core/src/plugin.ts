@@ -1,6 +1,7 @@
 import { default as fs } from "node:fs/promises";
 import { default as path } from "node:path";
-import { FileMigrationProvider, Kysely, Migrator } from "kysely";
+import { Kysely } from "kysely";
+import { FileMigrationProvider, Migrator } from "kysely/migration";
 import type { ProvidedContext } from "vitest";
 import type { Vite } from "vitest/node";
 import {
