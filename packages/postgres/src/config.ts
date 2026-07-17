@@ -1,3 +1,4 @@
+import type { Healthcheck } from "@kysely-vitest/core/docker.js";
 import type { ConfigProvider } from "@kysely-vitest/core/plugin.js";
 import type { ProvidedContext } from "vitest";
 
@@ -10,6 +11,24 @@ export const DEFAULT_POSTGRES_DB = "testdb";
 export const DEFAULT_POSTGRES_USER = "testuser";
 export const DEFAULT_POSTGRES_PASSWORD = "test";
 export const DEFAULT_POSTGRES_PORT = 5432;
+
+/**
+ * Default container healthcheck.
+ *
+ * `-h localhost` forces `pg_isready` to probe over TCP rather than the Unix
+ * socket. Some images (e.g. `postgis/postgis`) boot a temporary socket-only
+ * server to run their init scripts, during which a socket-based check already
+ * reports ready — probing TCP avoids being marked healthy before the real
+ * server is accepting connections.
+ */
+export const defaultHealthcheck = ({
+	user,
+}: HealthcheckConfig): Healthcheck => ({
+	test: ["pg_isready", "-U", user, "-h", "localhost"],
+	interval: "5s",
+	timeout: "5s",
+	retries: 5,
+});
 
 export const configProvider: ConfigProvider<
 	typeof POSTGRES_CONFIG_KEY,
@@ -25,13 +44,24 @@ export const configProvider: ConfigProvider<
 				? await config.password()
 				: config.password) || DEFAULT_POSTGRES_PASSWORD;
 
+		const resolvedConfig = {
+			host: "localhost",
+			port,
+			database,
+			user,
+			password,
+		};
+
+		const healthcheck: Healthcheck = {
+			...defaultHealthcheck(resolvedConfig),
+			...(dockerContainer !== true &&
+			typeof dockerContainer.healthcheck === "function"
+				? dockerContainer.healthcheck(resolvedConfig)
+				: {}),
+		};
+
 		const baseContainer = {
-			healthcheck: {
-				test: ["pg_isready", "-U", user],
-				interval: "5s",
-				timeout: "5s",
-				retries: 5,
-			},
+			healthcheck,
 			ports: [
 				{
 					hostPort: port,
@@ -98,9 +128,40 @@ export const configProvider: ConfigProvider<
 	};
 };
 
+/**
+ * Resolved connection settings handed to a {@link HealthcheckProvider}.
+ */
+export type HealthcheckConfig = {
+	host: string;
+	port: number;
+	database: string;
+	user: string;
+	password: string;
+};
+
+/**
+ * Builds a container healthcheck from the resolved Postgres connection config.
+ *
+ * The returned object is partial and merged over {@link defaultHealthcheck},
+ * so only the fields to override need to be returned.
+ */
+export type HealthcheckProvider = (
+	config: HealthcheckConfig,
+) => Partial<Healthcheck>;
+
 export type PluginConfig = ProvidedContext[typeof POSTGRES_CONFIG_KEY] & {
 	dockerContainer?:
-		| { image?: string; tag?: string; dockerFile?: never }
-		| { dockerFile: string; image?: string; tag?: never }
+		| {
+				image?: string;
+				tag?: string;
+				dockerFile?: never;
+				healthcheck?: HealthcheckProvider;
+		  }
+		| {
+				dockerFile: string;
+				image?: string;
+				tag?: never;
+				healthcheck?: HealthcheckProvider;
+		  }
 		| true;
 };
