@@ -54,7 +54,14 @@ export function createPlugin<K extends keyof ProvidedContext, C>({
 								}),
 							});
 
-							await migrator.migrateToLatest();
+							const { error, results } = await migrator.migrateToLatest();
+							if (error) {
+								context.vitest.logger.error(
+									`[${name}] Migration failed: ${error}` +
+										(results?.length ? ` (applied ${results.length})` : ""),
+								);
+								throw error;
+							}
 						} catch (e) {
 							context.vitest.logger.error(
 								`[${name}] Error during migrations: ${e}`,

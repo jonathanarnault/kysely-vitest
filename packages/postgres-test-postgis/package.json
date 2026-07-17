@@ -1,0 +1,22 @@
+{
+	"name": "@kysely-vitest/postgres-test-postgis",
+	"version": "0.4.0",
+	"private": true,
+	"type": "module",
+	"repository": {
+		"type": "https",
+		"url": "https://github.com/jonathanarnault/kysely-vitest"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit -p tsconfig.lib.json -p tsconfig.test.json",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"@kysely-vitest/postgres": "workspace:^",
+		"postgres": "catalog:"
+	},
+	"devDependencies": {
+		"kysely-postgres-js": "catalog:"
+	}
+}
