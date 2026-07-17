@@ -8,6 +8,8 @@ import {
 	DEFAULT_POSTGRES_PASSWORD,
 	DEFAULT_POSTGRES_PORT,
 	DEFAULT_POSTGRES_USER,
+	RANDOM_PORT_MAX,
+	RANDOM_PORT_MIN,
 } from "./config.js";
 
 describe("configProvider", () => {
@@ -55,10 +57,13 @@ describe("configProvider", () => {
 
 			const result = await configProvider(config);
 
+			expect(result.config.port).toBeGreaterThanOrEqual(RANDOM_PORT_MIN);
+			expect(result.config.port).toBeLessThanOrEqual(RANDOM_PORT_MAX);
+
 			expect(result).toEqual({
 				config: {
 					host: "localhost",
-					port: DEFAULT_POSTGRES_PORT,
+					port: result.config.port,
 					database: DEFAULT_POSTGRES_DB,
 					user: DEFAULT_POSTGRES_USER,
 					password: DEFAULT_POSTGRES_PASSWORD,
@@ -80,7 +85,7 @@ describe("configProvider", () => {
 					},
 					ports: [
 						{
-							hostPort: DEFAULT_POSTGRES_PORT,
+							hostPort: result.config.port,
 							containerPort: DEFAULT_POSTGRES_PORT,
 						},
 					],
@@ -93,18 +98,37 @@ describe("configProvider", () => {
 			});
 		});
 
+		it("uses a random host port in the [20000, 50000] range when no port is provided", async () => {
+			const config: PluginConfig = {
+				dockerContainer: true,
+			};
+
+			const result = await configProvider(config);
+
+			expect(result.config.port).toBeGreaterThanOrEqual(RANDOM_PORT_MIN);
+			expect(result.config.port).toBeLessThanOrEqual(RANDOM_PORT_MAX);
+			if (result.dockerContainer !== false) {
+				expect(result.dockerContainer.ports).toEqual([
+					{
+						hostPort: result.config.port,
+						containerPort: DEFAULT_POSTGRES_PORT,
+					},
+				]);
+			}
+		});
+
 		it.each([
 			{
 				configOverride: { database: "customdb" },
 				expectedDatabase: "customdb",
 				expectedUser: DEFAULT_POSTGRES_USER,
-				expectedPort: DEFAULT_POSTGRES_PORT,
+				expectedPort: undefined,
 			},
 			{
 				configOverride: { user: "customuser" },
 				expectedDatabase: DEFAULT_POSTGRES_DB,
 				expectedUser: "customuser",
-				expectedPort: DEFAULT_POSTGRES_PORT,
+				expectedPort: undefined,
 			},
 			{
 				configOverride: { port: 5555 },
@@ -127,7 +151,12 @@ describe("configProvider", () => {
 
 			expect(result.config.database).toBe(expectedDatabase);
 			expect(result.config.user).toBe(expectedUser);
-			expect(result.config.port).toBe(expectedPort);
+			if (expectedPort === undefined) {
+				expect(result.config.port).toBeGreaterThanOrEqual(RANDOM_PORT_MIN);
+				expect(result.config.port).toBeLessThanOrEqual(RANDOM_PORT_MAX);
+			} else {
+				expect(result.config.port).toBe(expectedPort);
+			}
 		});
 
 		it("handles password as a string", async () => {
@@ -337,7 +366,8 @@ describe("configProvider", () => {
 			const result = await configProvider(config);
 
 			expect(result.config.host).toBe("localhost");
-			expect(result.config.port).toBe(DEFAULT_POSTGRES_PORT);
+			expect(result.config.port).toBeGreaterThanOrEqual(RANDOM_PORT_MIN);
+			expect(result.config.port).toBeLessThanOrEqual(RANDOM_PORT_MAX);
 			expect(result.config.database).toBe(DEFAULT_POSTGRES_DB);
 			expect(result.config.user).toBe(DEFAULT_POSTGRES_USER);
 			expect(result.config.password).toBe(DEFAULT_POSTGRES_PASSWORD);

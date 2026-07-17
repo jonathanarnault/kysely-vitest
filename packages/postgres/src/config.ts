@@ -12,6 +12,22 @@ export const DEFAULT_POSTGRES_USER = "testuser";
 export const DEFAULT_POSTGRES_PASSWORD = "test";
 export const DEFAULT_POSTGRES_PORT = 5432;
 
+export const RANDOM_PORT_MIN = 20000;
+export const RANDOM_PORT_MAX = 50000;
+
+/**
+ * Picks a random host port in the [RANDOM_PORT_MIN, RANDOM_PORT_MAX] range.
+ *
+ * Used as the default host port when starting a Docker container so that
+ * concurrent test runs don't collide on a fixed port.
+ */
+export function randomHostPort(): number {
+	return (
+		Math.floor(Math.random() * (RANDOM_PORT_MAX - RANDOM_PORT_MIN + 1)) +
+		RANDOM_PORT_MIN
+	);
+}
+
 /**
  * Default container healthcheck.
  *
@@ -35,7 +51,7 @@ export const configProvider: ConfigProvider<
 	PluginConfig
 > = async ({ dockerContainer, ...config }) => {
 	if (dockerContainer) {
-		const port = config.port ?? DEFAULT_POSTGRES_PORT;
+		const port = config.port ?? randomHostPort();
 
 		const database = config.database ?? DEFAULT_POSTGRES_DB;
 		const user = config.user ?? DEFAULT_POSTGRES_USER;
