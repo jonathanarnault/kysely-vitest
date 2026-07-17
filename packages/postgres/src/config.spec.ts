@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import type { PluginConfig } from "./config.js";
+import { describe, expect, it, vi } from "vitest";
+import type { HealthcheckConfig, PluginConfig } from "./config.js";
 import {
 	configProvider,
 	DEFAULT_DOCKER_IMAGE,
@@ -67,7 +67,13 @@ describe("configProvider", () => {
 					image: DEFAULT_DOCKER_IMAGE,
 					tag: DEFAULT_DOCKER_TAG,
 					healthcheck: {
-						test: ["pg_isready", "-U", DEFAULT_POSTGRES_USER],
+						test: [
+							"pg_isready",
+							"-U",
+							DEFAULT_POSTGRES_USER,
+							"-h",
+							"localhost",
+						],
 						interval: "5s",
 						timeout: "5s",
 						retries: 5,
@@ -188,6 +194,8 @@ describe("configProvider", () => {
 					"pg_isready",
 					"-U",
 					"customuser",
+					"-h",
+					"localhost",
 				]);
 			}
 		});
@@ -259,7 +267,7 @@ describe("configProvider", () => {
 					image: "postgis/postgis",
 					tag: "17-alpine",
 					healthcheck: {
-						test: ["pg_isready", "-U", "geouser"],
+						test: ["pg_isready", "-U", "geouser", "-h", "localhost"],
 						interval: "5s",
 						timeout: "5s",
 						retries: 5,
@@ -275,6 +283,46 @@ describe("configProvider", () => {
 						POSTGRES_USER: "geouser",
 						POSTGRES_PASSWORD: "geopass",
 					},
+				});
+			}
+		});
+
+		it("merges a partial custom healthcheck over the defaults", async () => {
+			const healthcheck = vi.fn(({ user }: HealthcheckConfig) => ({
+				test: ["pg_isready", "-U", user, "-h", "localhost"],
+				retries: 10,
+			}));
+
+			const config: PluginConfig = {
+				dockerContainer: {
+					image: "postgis/postgis",
+					tag: "17-3.5",
+					healthcheck,
+				},
+				database: "geodb",
+				user: "geouser",
+				password: "geopass",
+				port: 5433,
+			};
+
+			const result = await configProvider(config);
+
+			expect(healthcheck).toHaveBeenCalledWith({
+				host: "localhost",
+				port: 5433,
+				database: "geodb",
+				user: "geouser",
+				password: "geopass",
+			});
+
+			if (result.dockerContainer !== false) {
+				expect(result.dockerContainer.healthcheck).toEqual({
+					// overridden by the provider
+					test: ["pg_isready", "-U", "geouser", "-h", "localhost"],
+					retries: 10,
+					// kept from defaultHealthcheck
+					interval: "5s",
+					timeout: "5s",
 				});
 			}
 		});

@@ -48,16 +48,18 @@ async function waitForContainer(
 	return waitForContainer(containerName, status);
 }
 
+export type Healthcheck = {
+	test: string[];
+	interval?: string;
+	timeout?: string;
+	retries?: number;
+	startPeriod?: string;
+};
+
 type DockerContainerBase = {
 	environment?: Record<string, string>;
 	ports?: Array<{ hostPort: number; containerPort: number }>;
-	healthcheck?: {
-		test: string[];
-		interval?: string;
-		timeout?: string;
-		retries?: number;
-		startPeriod?: string;
-	};
+	healthcheck?: Healthcheck;
 };
 
 export type DockerContainer = DockerContainerBase &
