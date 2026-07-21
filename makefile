@@ -39,5 +39,5 @@ pack:									## Pack all packages into the dist/ folder
 version-bump:							## Bump version for all packages
 	pnpm version $(VERSION) --recursive --no-git-tag-version --no-commit-hooks
 
-publish:								## Publish all public packages
+publish: build							## Publish all public packages
 	pnpm publish -r --access public

@@ -171,6 +171,57 @@ dockerContainer: {
 },
 ```
 
+### Customize the Container Healthcheck
+
+The managed container is only considered ready once its healthcheck passes. By default, `@kysely-vitest/postgres` probes readiness with:
+
+```ts
+{
+    // `-h localhost` forces a TCP probe rather than the Unix socket, so images
+    // that boot a temporary socket-only server during init (e.g. `postgis/postgis`)
+    // are not marked healthy before the real server accepts connections.
+    test: ["pg_isready", "-U", user, "-h", "localhost"],
+    interval: "5s",
+    timeout: "5s",
+    retries: 5,
+}
+```
+
+You can override the healthcheck by passing a `healthcheck` function to `dockerContainer`. It receives the resolved connection config (`host`, `port`, `database`, `user`, `password`) and returns a partial healthcheck that is merged over the default — only return the fields you want to change:
+
+```ts
+// in vitest.config.ts
+
+export default defineConfig({
+    plugins: [
+        // Other plugins
+        kyselyPostgres<DB>({
+            config: {
+                // ... configuration
+
+                dockerContainer: {
+                    image: "postgis/postgis",
+                    tag: "17-3.5",
+
+                    // Override the readiness probe
+                    healthcheck: ({ user }) => ({
+                        test: ["pg_isready", "-U", user, "-h", "localhost"],
+                        interval: "5s",
+                        timeout: "5s",
+                        retries: 5,
+
+                        // Optional grace period before the first check
+                        startPeriod: "2s",
+                    }),
+                },
+            },
+        }),
+    ],
+});
+```
+
+The returned object accepts the standard Docker healthcheck fields: `test` (required), `interval`, `timeout`, `retries`, and `startPeriod`.
+
 ## Run your Test Suite with an Unmanaged Container
 
 To run you test suite with an unmanaged container, you will need to start a PostgreSQL database on your own. The `@kysely-vitest/postgres` plugin will automatically run your migrations on that database.
