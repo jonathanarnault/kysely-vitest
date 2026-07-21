@@ -19,6 +19,14 @@ export default defineConfig({
 					// readiness race a plain `postgres` image inits too fast to hit.
 					image: "postgis/postgis",
 					tag: "17-3.5",
+					healthcheck({ user }) {
+						return {
+							test: ["pg_isready", "-U", user, "-h", "localhost"],
+							interval: "5s",
+							timeout: "5s",
+							retries: 5,
+						};
+					},
 				},
 			},
 			migrationFolder: path.resolve(__dirname, "migrations"),
