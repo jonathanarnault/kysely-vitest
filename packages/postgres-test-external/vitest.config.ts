@@ -18,10 +18,12 @@ export default defineConfig({
 			},
 			migrationFolder: path.resolve(__dirname, "migrations"),
 			seed,
+			reset: true,
 		}),
 	],
 	test: {
 		include: ["src/**/*.spec.ts"],
+		fileParallelism: false,
 		testTimeout: 2500,
 		coverage: {
 			provider: "v8",

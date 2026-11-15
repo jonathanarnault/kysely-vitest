@@ -9,19 +9,21 @@ import {
 	startDockerContainer,
 	stopDockerContainer,
 } from "./docker.js";
-import type { DialectFactory, SeedFunction } from "./types.js";
+import type { DialectFactory, ResetFunction, SeedFunction } from "./types.js";
 
-export function createPlugin<K extends keyof ProvidedContext, C>({
+export function createPlugin<K extends keyof ProvidedContext, C, R = never>({
 	name,
 	configKey,
 	configProvider,
 	dialectFactory,
-}: PluginConfig<K, C>) {
+	resetDatabase,
+}: PluginConfig<K, C, R>) {
 	return function plugin<DB>({
 		config,
 		migrationFolder,
 		seed,
-	}: PluginParams<C, DB>): Vite.Plugin {
+		reset,
+	}: PluginParams<C, DB, R>): Vite.Plugin {
 		return {
 			name: `kysely-vitest-${name}`,
 			async configureVitest(context) {
@@ -43,6 +45,15 @@ export function createPlugin<K extends keyof ProvidedContext, C>({
 				});
 
 				try {
+					if (reset) {
+						if (!resetDatabase) {
+							throw new Error(
+								`[${name}] The "reset" option is not supported by this plugin`,
+							);
+						}
+						await resetDatabase(db, reset);
+					}
+
 					if (migrationFolder) {
 						try {
 							const migrator = new Migrator({
@@ -85,17 +96,19 @@ export function createPlugin<K extends keyof ProvidedContext, C>({
 	};
 }
 
-export type PluginConfig<K extends keyof ProvidedContext, C> = {
+export type PluginConfig<K extends keyof ProvidedContext, C, R = never> = {
 	name: string;
 	configKey: K;
 	configProvider: ConfigProvider<K, C>;
 	dialectFactory: DialectFactory<K>;
+	resetDatabase?: ResetFunction<R>;
 };
 
-export type PluginParams<C, DB> = {
+export type PluginParams<C, DB, R = never> = {
 	config: C;
 	migrationFolder?: string;
 	seed?: SeedFunction<DB>;
+	reset?: R | false;
 };
 
 export type ConfigProvider<K extends keyof ProvidedContext, C> = (

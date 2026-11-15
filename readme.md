@@ -360,6 +360,30 @@ export const configProvider: ConfigProvider<
 }
 ```
 
+#### Reset Function
+
+Pass a `resetDatabase` function to let users of your plugin wipe the database before migrations with the `reset` option.
+It receives the database and the value of `reset`, whose type is the third type parameter of `createPlugin`:
+
+```ts
+import type { ResetFunction } from "@kysely-vitest/core/types.js";
+
+type MyResetOptions = true | { schemas?: string[] };
+
+const resetDatabase: ResetFunction<MyResetOptions> = async (db, options) => {
+    // ... drop everything
+};
+
+export const kyselyPlugin = createPlugin<
+    typeof MY_DIALECT_CONFIG_KEY,
+    MyConfig,
+    MyResetOptions
+>({
+    // ... plugin configuration
+    resetDatabase,
+});
+```
+
 #### Create the Test Function Factory
 
 Once your plugin has been configured, you can create your `test` function. Here is an example of a `dbTest` function:
@@ -439,3 +463,31 @@ export default defineConfig({
 ```
 
 Note: The seeding function will be run once before running your tests suite and will not run on test reload.
+
+## Reset the Database
+
+An external database keeps its schema between runs, so switching branches can leave tables and migrations from another branch behind.
+Set the `reset` option to drop the `public` schema and recreate it empty before running migrations:
+
+```ts
+// in vitest.config.ts
+export default defineConfig({
+    plugins: [
+        kyselyPostgres<DB>({
+            // Configure the plugin
+            migrationFolder: path.resolve(__dirname, "migrations"),
+            reset: true,
+        }),
+    ],
+});
+```
+
+Pass `schemas` to also drop other schemas your migrations create:
+
+```ts
+reset: {
+    schemas: ["audit"],
+},
+```
+
+Note: Extensions installed in a dropped schema (e.g. `postgis`) are dropped too, so your migrations must create them.

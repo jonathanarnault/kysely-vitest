@@ -125,6 +125,30 @@ export const configProvider: ConfigProvider<
 }
 ```
 
+## Reset Function
+
+Pass a `resetDatabase` function to let users of your plugin wipe the database before migrations with the `reset` option.
+It receives the database and the value of `reset`, whose type is the third type parameter of `createPlugin`:
+
+```ts
+import type { ResetFunction } from "@kysely-vitest/core/types.js";
+
+type MyResetOptions = true | { schemas?: string[] };
+
+const resetDatabase: ResetFunction<MyResetOptions> = async (db, options) => {
+    // ... drop everything
+};
+
+export const kyselyPlugin = createPlugin<
+    typeof MY_DIALECT_CONFIG_KEY,
+    MyConfig,
+    MyResetOptions
+>({
+    // ... plugin configuration
+    resetDatabase,
+});
+```
+
 ## Create the Test Function Factory
 
 Once your plugin has been configured, you can create your `test` function. Here is an example of a `dbTest` function:
