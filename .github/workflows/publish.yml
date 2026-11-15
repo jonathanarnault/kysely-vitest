@@ -74,6 +74,6 @@ jobs:
 
       - name: Stage packages on npm
         run: |
-          for tarball in tarballs/*.tgz; do
+          for tarball in ./tarballs/*.tgz; do
             npm stage publish "$tarball" --access public --provenance
           done
