@@ -6,3 +6,8 @@ export type DialectFactory<K extends keyof ProvidedContext> = (
 ) => Dialect;
 
 export type SeedFunction<DB> = (db: Kysely<DB>) => Promise<void>;
+
+export type ResetFunction<O> = <DB>(
+	db: Kysely<DB>,
+	options: O,
+) => Promise<void>;

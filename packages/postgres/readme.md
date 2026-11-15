@@ -310,3 +310,31 @@ export default defineConfig({
 ```
 
 Note: The seeding function will be run once before running your tests suite and will not run on test reload.
+
+## Reset the Database
+
+An external database keeps its schema between runs, so switching branches can leave tables and migrations from another branch behind.
+Set the `reset` option to drop the `public` schema and recreate it empty before running migrations:
+
+```ts
+// in vitest.config.ts
+export default defineConfig({
+    plugins: [
+        kyselyPostgres<DB>({
+            // Configure the plugin
+            migrationFolder: path.resolve(__dirname, "migrations"),
+            reset: true,
+        }),
+    ],
+});
+```
+
+Pass `schemas` to also drop other schemas your migrations create:
+
+```ts
+reset: {
+    schemas: ["audit"],
+},
+```
+
+Note: Extensions installed in a dropped schema (e.g. `postgis`) are dropped too, so your migrations must create them.
