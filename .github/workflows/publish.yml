@@ -13,12 +13,14 @@ jobs:
     environment: npm
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -31,17 +33,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check release tag matches package versions
+      - name: Set package versions from release tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: make version-bump VERSION="${TAG#v}"
+
+      - name: Push version bump to main
         env:
           TAG: ${{ github.event.release.tag_name }}
         run: |
-          for pkg in core postgres; do
-            version="v$(node -p "require('./packages/$pkg/package.json').version")"
-            if [ "$version" != "$TAG" ]; then
-              echo "::error::@kysely-vitest/$pkg is $version but the release tag is $TAG"
-              exit 1
-            fi
-          done
+          if git diff --quiet -- package.json packages/*/package.json; then
+            echo "Package versions already match $TAG"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json packages/*/package.json
+          git commit --message "Bump version to ${TAG#v}"
+          bump="$(git rev-parse HEAD)"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
+          git checkout --quiet "$bump"
 
       - name: Install npm with staged publishing support
         run: npm install -g npm@^11.20.0
