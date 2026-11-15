@@ -1,0 +1,7 @@
+{
+  "id": "pnpm",
+  "version": "1.0.0",
+  "name": "pnpm",
+  "postCreateCommand": "/usr/local/share/pnpm/post-create.sh",
+  "installsAfter": ["ghcr.io/devcontainers/features/common-utils:1"]
+}

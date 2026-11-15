@@ -1,28 +1,44 @@
 {
+  "skillListingMaxDescChars": 512,
+  "env": {
+    "ENABLE_LSP_TOOL": "1"
+  },
+  "outputStyle": "concise",
   "includeCoAuthoredBy": false,
   "attribution": {
-    "commit": ""
+    "commit": "",
+    "pr": ""
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/deny-env-read.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/deny-find-outside-repo.sh"
-          }
-        ]
+  "enabledPlugins": {
+    "ponytail@ponytail": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
       }
-    ]
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      },
+      "autoUpdate": true
+    }
+  },
+  "lspServers": {
+    "typescript": {
+      "command": "typescript-language-server",
+      "args": [
+        "--stdio"
+      ],
+      "fileTypes": [
+        ".ts",
+        ".mjs",
+        ".js"
+      ]
+    }
   }
 }

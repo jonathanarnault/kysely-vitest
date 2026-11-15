@@ -3,8 +3,9 @@
 	"version": "0.4.2",
 	"type": "module",
 	"repository": {
-		"type": "https",
-		"url": "https://github.com/jonathanarnault/kysely-vitest"
+		"type": "git",
+		"url": "git+https://github.com/jonathanarnault/kysely-vitest.git",
+		"directory": "packages/postgres"
 	},
 	"scripts": {
 		"build": "tsc --build --force tsconfig.lib.json",
@@ -27,5 +28,9 @@
 	"exports": {
 		".": "./dist/index.js",
 		"./*": "./dist/*"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
 	}
 }

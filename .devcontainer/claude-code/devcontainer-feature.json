@@ -1,0 +1,32 @@
+{
+  "id": "claude-code",
+  "version": "1.0.0",
+  "name": "Claude Code",
+  "installsAfter": ["ghcr.io/devcontainers/features/common-utils:1"],
+  "containerEnv": {
+    "ENABLE_CLAUDEAI_MCP_SERVERS": "false"
+  },
+  "postCreateCommand": "/usr/local/share/claude-code/post-create.sh",
+  "mounts": [
+    {
+      "type": "volume",
+      "source": "devcontainers-shared-claude",
+      "target": "/home/node/.claude"
+    },
+    {
+      "type": "volume",
+      "source": "${devcontainerId}-claude-plugins",
+      "target": "/home/node/.claude/plugins"
+    },
+    {
+      "type": "volume",
+      "source": "devcontainers-shared-claude-projects",
+      "target": "/home/node/.claude/projects"
+    }
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": ["Anthropic.claude-code"]
+    }
+  }
+}
