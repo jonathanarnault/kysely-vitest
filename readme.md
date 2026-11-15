@@ -19,7 +19,7 @@ Then, you can define your [database types](https://kysely.dev/docs/getting-start
 ```ts
 // in src/db.ts
 export type DB = {
-    // ...
+	// ...
 };
 ```
 
@@ -56,20 +56,20 @@ import { defineConfig } from "vitest/config";
 import type { DB } from "./src/db.js";
 
 export default defineConfig({
-    plugins: [
-        // Other plugins
-        kyselyPostgres<DB>({
-            config: {
-                database: "testdb",
-                username: "test",
-                password: "test",
-            },
-            migrationFolder: path.resolve(__dirname, "migrations"),
-        }),
-    ],
-    test: {
-        // Test configuration
-    },
+	plugins: [
+		// Other plugins
+		kyselyPostgres<DB>({
+			config: {
+				database: "testdb",
+				username: "test",
+				password: "test",
+			},
+			migrationFolder: path.resolve(__dirname, "migrations"),
+		}),
+	],
+	test: {
+		// Test configuration
+	},
 });
 ```
 
@@ -95,9 +95,9 @@ import { describe, expect } from "vitest";
 import { pgTest } from "./tests/pgTest.js";
 
 describe("myTestSuite", () => {
-    pgTest("my test", async ({ db }) => {
-        // ...
-    });
+	pgTest("my test", async ({ db }) => {
+		// ...
+	});
 });
 ```
 
@@ -113,27 +113,27 @@ Here is an example on how to configure a managed container with `@kysely-vitest/
 // in vitest.config.ts
 
 export default defineConfig({
-    plugins: [
-        // Other plugins
-        kyselyPostgres<DB>({
-            config: {
-                // Will be used as host port, defaults to `5432`
-                port: 5433,
+	plugins: [
+		// Other plugins
+		kyselyPostgres<DB>({
+			config: {
+				// Will be used as host port, defaults to `5432`
+				port: 5433,
 
-                // Will be used in POSTGRES_DB env, defaults to `testdb`
-                database: "mydb",
+				// Will be used in POSTGRES_DB env, defaults to `testdb`
+				database: "mydb",
 
-                // Will be used in POSTGRES_USER env, defaults to `testuser`
-                user: "myuser",
+				// Will be used in POSTGRES_USER env, defaults to `testuser`
+				user: "myuser",
 
-                // Will be used in POSTGRES_PASSWORD env, defaults to `test`
-                password: "secret",
+				// Will be used in POSTGRES_PASSWORD env, defaults to `test`
+				password: "secret",
 
-                // The container will use postgres:latest
-                dockerContainer: true
-            },
-        }),
-    ],
+				// The container will use postgres:latest
+				dockerContainer: true,
+			},
+		}),
+	],
 });
 ```
 
@@ -143,20 +143,20 @@ You can also select a custom `image` or `tag` for the container:
 // in vitest.config.ts
 
 export default defineConfig({
-    plugins: [
-        // Other plugins
-        kyselyPostgres<DB>({
-            config: {
-                // ... configuration
+	plugins: [
+		// Other plugins
+		kyselyPostgres<DB>({
+			config: {
+				// ... configuration
 
-                // Use custom image / tag
-                dockerContainer: {
-                    image: "postgres",
-                    tag: "18-alpine",
-                },
-            },
-        }),
-    ],
+				// Use custom image / tag
+				dockerContainer: {
+					image: "postgres",
+					tag: "18-alpine",
+				},
+			},
+		}),
+	],
 });
 ```
 
@@ -167,19 +167,19 @@ You can also use a custom Dockerfile to build and run the container:
 import path from "node:path";
 
 export default defineConfig({
-    plugins: [
-        // Other plugins
-        kyselyPostgres<DB>({
-            config: {
-                // ... configuration
+	plugins: [
+		// Other plugins
+		kyselyPostgres<DB>({
+			config: {
+				// ... configuration
 
-                // Build and run a container from a custom Dockerfile
-                dockerContainer: {
-                    dockerFile: path.resolve(__dirname, "Dockerfile"),
-                },
-            },
-        }),
-    ],
+				// Build and run a container from a custom Dockerfile
+				dockerContainer: {
+					dockerFile: path.resolve(__dirname, "Dockerfile"),
+				},
+			},
+		}),
+	],
 });
 ```
 
@@ -250,27 +250,27 @@ Here is an example on how to create you dialect factory function:
 ```ts
 // in src/tests/dialect.ts
 import type { DialectFactory } from "@kysely-vitest/core/types.js";
-import { MyDialect } from 'kysely/my-dialect';
+import { MyDialect } from "kysely/my-dialect";
 
 export const MY_DIALECT_CONFIG_KEY = "myDialectConfig" as const;
 
-export const myDialectFactory: DialectFactory<
-    typeof MY_DIALECT_CONFIG_KEY
-> = (config) => {
-    return new MyDialect({
-        // Dialect configuration
-    })
+export const myDialectFactory: DialectFactory<typeof MY_DIALECT_CONFIG_KEY> = (
+	config,
+) => {
+	return new MyDialect({
+		// Dialect configuration
+	});
 };
 
 // Extend vitest types
 declare module "vitest" {
-    export type MyDialectConfig = {
-        // Dialect options
-    };
+	export type MyDialectConfig = {
+		// Dialect options
+	};
 
-    export interface ProvidedContext {
-        myDialectConfig: MyDialectConfig;
-    }
+	export interface ProvidedContext {
+		myDialectConfig: MyDialectConfig;
+	}
 }
 ```
 
@@ -286,9 +286,9 @@ import { createPlugin } from "@kysely-vitest/core/plugin.js";
 import { MY_DIALECT_CONFIG_KEY, myDialectFactory } from "./dialect.js";
 
 export const kyselyPlugin = createPlugin({
-    name: "plugin",
-    configKey: MY_DIALECT_CONFIG_KEY,
-    dialectFactory: myDialectFactory,
+	name: "plugin",
+	configKey: MY_DIALECT_CONFIG_KEY,
+	dialectFactory: myDialectFactory,
 });
 ```
 
@@ -302,18 +302,18 @@ import type { DB } from "./src/db.js";
 import { kyselyPlugin } from "./src/tests/plugin.js";
 
 export default defineConfig({
-    plugins: [
-        // Other plugins
-        kyselyPlugin<DB>({
-            config: {
-                // Your dialect configuration
-            },
-            migrationFolder: path.resolve(__dirname, "migrations"),
-        }),
-    ],
-    test: {
-        // Test configuration
-    },
+	plugins: [
+		// Other plugins
+		kyselyPlugin<DB>({
+			config: {
+				// Your dialect configuration
+			},
+			migrationFolder: path.resolve(__dirname, "migrations"),
+		}),
+	],
+	test: {
+		// Test configuration
+	},
 });
 ```
 
@@ -330,13 +330,13 @@ Pass your custom config provider when you configure your plugin:
 import { configProvider, type MyConfig } from "./config.js";
 
 export const kyselyPlugin = createPlugin<
-    typeof MY_DIALECT_CONFIG_KEY,
-    MyConfig
+	typeof MY_DIALECT_CONFIG_KEY,
+	MyConfig
 >({
-    name: "plugin",
-    configKey: MY_DIALECT_CONFIG_KEY,
-    configProvider,
-    dialectFactory: myDialectFactory,
+	name: "plugin",
+	configKey: MY_DIALECT_CONFIG_KEY,
+	configProvider,
+	dialectFactory: myDialectFactory,
 });
 ```
 
@@ -371,16 +371,16 @@ import type { ResetFunction } from "@kysely-vitest/core/types.js";
 type MyResetOptions = true | { schemas?: string[] };
 
 const resetDatabase: ResetFunction<MyResetOptions> = async (db, options) => {
-    // ... drop everything
+	// ... drop everything
 };
 
 export const kyselyPlugin = createPlugin<
-    typeof MY_DIALECT_CONFIG_KEY,
-    MyConfig,
-    MyResetOptions
+	typeof MY_DIALECT_CONFIG_KEY,
+	MyConfig,
+	MyResetOptions
 >({
-    // ... plugin configuration
-    resetDatabase,
+	// ... plugin configuration
+	resetDatabase,
 });
 ```
 
@@ -395,8 +395,8 @@ import { MY_DIALECT_CONFIG_KEY, myDialectFactory } from "./dialect.js";
 import type { DB } from "../db.js";
 
 export const dbTest = createTestFunction<typeof MY_DIALECT_CONFIG_KEY, DB>({
-    configKey: MY_DIALECT_CONFIG_KEY,
-    dialectFactory: myDialectFactory,
+	configKey: MY_DIALECT_CONFIG_KEY,
+	dialectFactory: myDialectFactory,
 });
 ```
 
@@ -408,9 +408,9 @@ import { describe, expect } from "vitest";
 import { dbTest } from "./tests/dbTest.js";
 
 describe("myTestSuite", () => {
-    dbTest("my test", async ({ db }) => {
-        // ...
-    });
+	dbTest("my test", async ({ db }) => {
+		// ...
+	});
 });
 ```
 
@@ -429,12 +429,12 @@ import { sql } from "kysely";
 import type { DB } from "../db.js";
 
 export const seed: SeedFunction<DB> = async (db) => {
-    await sql<void>`TRUNCATE TABLE "users" RESTART IDENTITY CASCADE`.execute(db);
+	await sql<void>`TRUNCATE TABLE "users" RESTART IDENTITY CASCADE`.execute(db);
 
-    await db
-        .insertInto("users")
-        .values([{ username: "alice" }, { username: "bob" }])
-        .execute();
+	await db
+		.insertInto("users")
+		.values([{ username: "alice" }, { username: "bob" }])
+		.execute();
 };
 ```
 
@@ -449,16 +449,16 @@ import type { DB } from "./src/db.js";
 import { seed } from "./src/tests/seed.js";
 
 export default defineConfig({
-    plugins: [
-        // Other plugins
-        kyselyPostgres<DB>({
-            // Configure the plugin
-            seed,
-        }),
-    ],
-    test: {
-        // Test configuration
-    },
+	plugins: [
+		// Other plugins
+		kyselyPostgres<DB>({
+			// Configure the plugin
+			seed,
+		}),
+	],
+	test: {
+		// Test configuration
+	},
 });
 ```
 
@@ -472,13 +472,13 @@ Set the `reset` option to drop the `public` schema and recreate it empty before 
 ```ts
 // in vitest.config.ts
 export default defineConfig({
-    plugins: [
-        kyselyPostgres<DB>({
-            // Configure the plugin
-            migrationFolder: path.resolve(__dirname, "migrations"),
-            reset: true,
-        }),
-    ],
+	plugins: [
+		kyselyPostgres<DB>({
+			// Configure the plugin
+			migrationFolder: path.resolve(__dirname, "migrations"),
+			reset: true,
+		}),
+	],
 });
 ```
 

@@ -7,9 +7,9 @@ allowBuilds:
 minimumReleaseAge: 4320
 
 catalog:
-  '@biomejs/biome': 2.6.7
-  '@types/node': ^26.6.6
-  '@vitest/coverage-v8': ^4.1.7
+  "@biomejs/biome": 2.6.7
+  "@types/node": ^26.6.6
+  "@vitest/coverage-v8": ^4.1.7
   kysely: ^0.29.8
   kysely-postgres-js: ^3.0.0
   postgres: ^3.4.7

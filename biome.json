@@ -15,13 +15,6 @@
 			"correctness": {
 				"noUnusedImports": "error"
 			},
-			"nursery": {
-				"useSortedClasses": {
-					"level": "error",
-					"fix": "safe",
-					"options": {}
-				}
-			},
 			"suspicious": {
 				"noUnknownAtRules": "off"
 			}
