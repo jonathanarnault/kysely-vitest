@@ -2,7 +2,7 @@ import { sql } from "kysely";
 import { describe, expect } from "vitest";
 import { pgTest } from "./tests/pgTest.js";
 
-describe.sequential("db", () => {
+describe("db", () => {
 	pgTest(
 		"it should run migrations against a postgis container",
 		async ({ db }) => {

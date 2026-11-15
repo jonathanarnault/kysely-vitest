@@ -9,13 +9,17 @@ minimumReleaseAge: 4320
 catalog:
   "@biomejs/biome": 2.6.7
   "@types/node": ^26.6.6
-  "@vitest/coverage-v8": ^4.1.7
+  "@vitest/coverage-v8": ^5.1.0
   kysely: ^0.29.8
   kysely-postgres-js: ^3.0.0
   postgres: ^3.4.7
   turbo: ^2.11.11
   typescript: ^7.0.2
-  vitest: ^4.1.7
+  vitest: ^5.1.0
+
+catalogs:
+  peers:
+    vitest: ^4.0.0 || ^5.0.0
 
 catalogMode: strict
 

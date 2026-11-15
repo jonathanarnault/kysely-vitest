@@ -19,11 +19,12 @@
 	"peerDependencies": {
 		"kysely": "catalog:",
 		"kysely-postgres-js": "catalog:",
-		"vitest": "catalog:"
+		"vitest": "catalog:peers"
 	},
 	"devDependencies": {
 		"kysely-postgres-js": "catalog:",
-		"postgres": "catalog:"
+		"postgres": "catalog:",
+		"vitest": "catalog:"
 	},
 	"exports": {
 		".": "./dist/index.js",
