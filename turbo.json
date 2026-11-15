@@ -19,7 +19,8 @@
 			],
 			"cache": true,
 			"persistent": false,
-			"dependsOn": ["^build"]
+			"dependsOn": ["^build"],
+			"env": ["DEVCONTAINER"]
 		},
 		"test:watch": {
 			"inputs": [
@@ -31,7 +32,8 @@
 			"cache": false,
 			"persistent": true,
 			"interactive": true,
-			"dependsOn": ["^build"]
+			"dependsOn": ["^build"],
+			"env": ["DEVCONTAINER"]
 		},
 		"typecheck": {
 			"dependsOn": ["^build"]

@@ -1,0 +1,64 @@
+name: 'Publish'
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check release tag matches package versions
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          for pkg in core postgres; do
+            version="v$(node -p "require('./packages/$pkg/package.json').version")"
+            if [ "$version" != "$TAG" ]; then
+              echo "::error::@kysely-vitest/$pkg is $version but the release tag is $TAG"
+              exit 1
+            fi
+          done
+
+      - name: Install npm with staged publishing support
+        run: npm install -g npm@^11.20.0
+
+      - name: Build
+        run: make build
+
+      # pnpm pack rewrites workspace:^ ranges; npm handles the OIDC exchange
+      - name: Pack packages
+        run: |
+          mkdir -p tarballs
+          for pkg in core postgres; do
+            pnpm --filter "@kysely-vitest/$pkg" pack --pack-destination "$GITHUB_WORKSPACE/tarballs"
+          done
+
+      - name: Stage packages on npm
+        run: |
+          for tarball in tarballs/*.tgz; do
+            npm stage publish "$tarball" --access public --provenance
+          done

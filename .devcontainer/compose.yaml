@@ -1,0 +1,33 @@
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: dockerfile
+    volumes:
+      - ..:/workspaces/kysely-vitest:cached
+      - node_modules:/workspaces/kysely-vitest/node_modules
+    environment:
+      pnpm_config_store_dir: /workspaces/kysely-vitest/node_modules/.pnpm-store
+      DATABASE_URL: postgres://test:test@postgres:5432/testdb
+    command: sleep infinity
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d testdb"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  node_modules:
+  postgres:

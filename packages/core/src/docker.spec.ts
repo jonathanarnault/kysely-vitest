@@ -225,7 +225,7 @@ describe("buildContainerArgs", () => {
 	});
 });
 
-describe("runContainer", () => {
+describe.skipIf(process.env.DEVCONTAINER === "true")("runContainer", () => {
 	it("should run a container and wait for it to be healthy", async () => {
 		let containerName: string | null = null;
 		try {
