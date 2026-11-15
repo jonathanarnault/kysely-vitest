@@ -4,7 +4,7 @@
 
 ## Installation
 
-`kysely-vitest` depends on both `kysely@^0.28.0` and `vitest@^4.0.0` as peer dependencies for all adapters. Run one of the following commands to install the dependencies:
+`kysely-vitest` depends on both `kysely@^0.28.0` and `vitest@^4.0.0 || ^5.0.0` as peer dependencies for all adapters. Run one of the following commands to install the dependencies:
 
 ```shell
 npm install kysely && npm install -D vitest

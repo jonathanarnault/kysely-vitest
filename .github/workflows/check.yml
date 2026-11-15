@@ -31,6 +31,10 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        vitest: [4, 5]
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -46,6 +50,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Use Vitest ${{ matrix.vitest }}
+        if: matrix.vitest != 5
+        run: |
+          sed -i -E 's/^(  "?(@vitest\/coverage-v8|vitest)"?): .*/\1: ^${{ matrix.vitest }}.0.0/' pnpm-workspace.yaml
+          pnpm install --no-frozen-lockfile
+
       - name: Run TypeScript type check
         run: make typecheck
 
@@ -55,6 +65,7 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x, 24.x, 26.x]
+        vitest: [4, 5]
 
     steps:
       - name: Checkout Repository
@@ -70,6 +81,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Use Vitest ${{ matrix.vitest }}
+        if: matrix.vitest != 5
+        run: |
+          sed -i -E 's/^(  "?(@vitest\/coverage-v8|vitest)"?): .*/\1: ^${{ matrix.vitest }}.0.0/' pnpm-workspace.yaml
+          pnpm install --no-frozen-lockfile
 
       - name: Start Docker Containers
         run: make start

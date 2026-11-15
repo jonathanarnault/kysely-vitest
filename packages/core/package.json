@@ -15,10 +15,11 @@
 	},
 	"peerDependencies": {
 		"kysely": "catalog:",
-		"vitest": "catalog:"
+		"vitest": "catalog:peers"
 	},
 	"devDependencies": {
-		"postgres": "catalog:"
+		"postgres": "catalog:",
+		"vitest": "catalog:"
 	},
 	"exports": {
 		".": "./dist/index.js",
